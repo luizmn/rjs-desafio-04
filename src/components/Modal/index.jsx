@@ -1,30 +1,28 @@
-import { useState } from "react";
-import { Component } from "react";
-import ReactModal from "react-modal";
-import { HeaderProps } from "../../types";
+import { Component } from 'react';
+import ReactModal from 'react-modal';
 
-// class Modal extends Component {
-//   constructor(props) {
-//     super(props);
+class Modal extends Component {
+  constructor(props) {
+    super(props);
 
-//     const { isOpen } = this.props;
-//     this.state = {
-//       modalStatus: isOpen
-//     }
-//   }
-
-export function Modal({isOpen, modalStatus } : HeaderProps) {
-
-  const [isOpen, setIsOpen] = useState([modalStatus]);
-
-
-
-    if (modalStatus.isOpen !== isOpen) {
-      console.log(modalStatus)
-      setIsOpen({ modalStatus: isOpen })
+    const { isOpen } = this.props;
+    this.state = {
+      modalStatus: isOpen
     }
   }
 
+  componentDidUpdate(prevProps) {
+    const { isOpen } = this.props;
+
+    if (prevProps.isOpen !== isOpen) {
+      console.log(this.props)
+      this.setState({ modalStatus: isOpen })
+    }
+  }
+
+  render() {
+    const { children, setIsOpen } = this.props;
+    const { modalStatus } = this.state;
 
     return (
       <ReactModal
@@ -54,6 +52,7 @@ export function Modal({isOpen, modalStatus } : HeaderProps) {
         {children}
       </ReactModal>
     );
-  //}
+  }
 };
 
+export default Modal;

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { Component } from 'react';
 
 import Header from '../../components/Header';
 import api from '../../services/api';
@@ -6,41 +6,40 @@ import Food from '../../components/Food';
 import ModalAddFood from '../../components/ModalAddFood';
 import ModalEditFood from '../../components/ModalEditFood';
 import { FoodsContainer } from './styles';
-import { FoodProps, HeaderProps } from '../../types';
 
-export async function Dashboard({food, handleEditFood }: FoodProps, { openModal } : HeaderProps) {
+class Dashboard extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      foods: [],
+      editingFood: {},
+      modalOpen: false,
+      editModalOpen: false,
+    }
+  }
 
-// class Dashboard extends Component {
-//   constructor(props) {
-//     super(props);
-//     this.state = {
-//       foods: [],
-//       editingFood: {},
-//       modalOpen: false,
-//       editModalOpen: false,
-//     }
-//   }
+  async componentDidMount() {
+    const response = await api.get('/foods');
 
-  const [foodsList] = await Promise.all([
-    api.get(`foods/`)
-  ]);
+    this.setState({ foods: response.data });
+  }
 
-  const { data: foods} = foodsList;
-
-  async function handleAddFood() {
+  handleAddFood = async food => {
+    const { foods } = this.state;
 
     try {
       const response = await api.post('/foods', {
         ...food,
         available: true,
       });
-      setFoods({ foods: [...foods, response.data] });
+
+      this.setState({ foods: [...foods, response.data] });
     } catch (err) {
       console.log(err);
     }
   }
 
-  async function handleUpdateFood(id: FoodProps) {
+  handleUpdateFood = async food => {
     const { foods, editingFood } = this.state;
 
     try {
@@ -59,12 +58,14 @@ export async function Dashboard({food, handleEditFood }: FoodProps, { openModal 
     }
   }
 
-  async function handleDeleteFood(id: FoodProps) {
+  handleDeleteFood = async id => {
+    const { foods } = this.state;
+
     await api.delete(`/foods/${id}`);
 
     const foodsFiltered = foods.filter(food => food.id !== id);
 
-    setFoods({foodsFiltered});
+    this.setState({ foods: foodsFiltered });
   }
 
   toggleModal = () => {
@@ -83,19 +84,22 @@ export async function Dashboard({food, handleEditFood }: FoodProps, { openModal 
     this.setState({ editingFood: food, editModalOpen: true });
   }
 
+  render() {
+    const { modalOpen, editModalOpen, editingFood, foods } = this.state;
+
     return (
       <>
-        <Header openModal={toggleModal} />
+        <Header openModal={this.toggleModal} />
         <ModalAddFood
           isOpen={modalOpen}
-          setIsOpen={toggleModal}
-          handleAddFood={handleAddFood}
+          setIsOpen={this.toggleModal}
+          handleAddFood={this.handleAddFood}
         />
         <ModalEditFood
           isOpen={editModalOpen}
-          setIsOpen={toggleEditModal}
+          setIsOpen={this.toggleEditModal}
           editingFood={editingFood}
-          handleUpdateFood={handleUpdateFood}
+          handleUpdateFood={this.handleUpdateFood}
         />
 
         <FoodsContainer data-testid="foods-list">
@@ -104,11 +108,14 @@ export async function Dashboard({food, handleEditFood }: FoodProps, { openModal 
               <Food
                 key={food.id}
                 food={food}
-                handleDelete={handleDeleteFood}
-                handleEditFood={handleEditFood}
+                handleDelete={this.handleDeleteFood}
+                handleEditFood={this.handleEditFood}
               />
             ))}
         </FoodsContainer>
       </>
     );
   }
+};
+
+export default Dashboard;

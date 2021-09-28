@@ -1,10 +1,12 @@
+import { Component } from 'react';
 import { FiPlusSquare } from 'react-icons/fi';
 
 import { Container } from './styles';
 import Logo from '../../assets/logo.svg';
-import { HeaderProps } from '../../types';
 
-function Header({ openModal }: HeaderProps) {
+class Header extends Component {
+  render() {
+    const { openModal } = this.props;
 
     return (
       <Container>
@@ -26,7 +28,7 @@ function Header({ openModal }: HeaderProps) {
         </header>
       </Container>
     )
- 
+  }
 };
 
 export default Header;
